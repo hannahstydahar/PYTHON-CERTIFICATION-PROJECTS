@@ -1,0 +1,56 @@
+def add_time(start, duration, day=None):
+    #Step 1: Split the time and AM/PM period
+    start_time, period = start.split(" ")
+    #Step 2: Split the hours and minutes
+    start_hour, start_minute = start_time.split(":")
+    #Step 3: Convert hour and minute into integers
+    start_hour = int(start_hour)
+    start_minute = int(start_minute)
+
+    #Step 4: split the duration time into hours and minutes 
+    duration_hour, duration_minute = duration.split(":")
+    #Step 5: convert hour and minute from duration time into intergers
+    duration_hour = int(duration_hour)
+    duration_minute = int(duration_minute)
+
+    #Step 6: Add minutes and adjust hours if needed 
+    new_minute = start_minute + duration_minute
+    if new_minute >= 60:
+        new_minute -= 60
+        duration_hour += 1
+    
+    #Step 7: Add hours and handle AM/PM changes and #Step 8: ensure 12 hour clock formatting
+    total_hours = start_hour + duration_hour 
+    am_pm_flips = total_hours // 12
+    days_later = total_hours // 24
+
+    if period == "AM" and am_pm_flips % 2 == 1:
+        period = "PM"
+    elif period == "PM" and am_pm_flips % 2 == 1:
+        period = "AM"
+        days_later += 1
+
+    remaining_hours = (start_hour + duration_hour) % 12
+    if remaining_hours == 0:
+        remaining_hours = 12
+
+    #Step 9: Handle the optional starting day
+    new_day = None
+    if day:
+        days_of_week = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+        start_day_index = days_of_week.index(day.capitalize())
+        new_day_index = (start_day_index + days_later) % 7
+        new_day = days_of_week[new_day_index]
+
+    #Step 10: Format the number of days later
+    new_time = f"{remaining_hours}:{new_minute:02d} {period}" 
+
+    if new_day:
+        new_time += f", {new_day}"
+
+    if days_later == 1:
+        new_time += " (next day)"
+    elif days_later > 1:
+        new_time += f" ({days_later} days later)"
+
+    return new_time
