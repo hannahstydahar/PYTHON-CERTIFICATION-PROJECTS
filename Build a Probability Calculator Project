@@ -1,0 +1,61 @@
+import copy
+import random
+
+class Hat:
+    def __init__(self, **kwargs):
+        # Step 1 Initialize the contents list
+        self.contents = []
+        
+        # Loop through each color and count pair
+        for color, count in kwargs.items():
+            # Extend the contents list with the color repeated 'count' times
+            self.contents.extend([color] * count)
+
+    def draw(self, num_balls):
+        """Randomly remove 'num_balls' from the hat and return them."""
+        # If requesting more balls than available, return all and clear the hat
+        if num_balls >= len(self.contents):
+            all_balls = self.contents.copy()  # Copy current contents
+            self.contents.clear()  # Empty the hat
+            return all_balls  # Return all the balls
+        
+        # Otherwise, randomly draw the requested number of balls
+        drawn_balls = random.sample(self.contents, k=num_balls)
+        for ball in drawn_balls:
+            self.contents.remove(ball)  # Remove drawn balls from contents
+        
+        return drawn_balls
+
+    # Step 2: The Experiment Function
+def experiment(hat, expected_balls, num_balls_drawn, num_experiments):
+    # Initialize a counter to track successful experiments
+    success_count = 0
+    
+    # Perform the experiment 'num_experiments' times
+    for _ in range(num_experiments):
+        # Create a fresh copy of the hat with the same contents
+        hat_copy = Hat(**{color: hat.contents.count(color) for color in hat.contents})
+        
+        # Draw balls from the copied hat
+        drawn_balls = hat_copy.draw(num_balls_drawn)
+        
+        # Count the number of each color ball in the drawn balls
+        ball_counts = {color: drawn_balls.count(color) for color in expected_balls}
+        
+        # Check if the drawn balls meet or exceed the expected counts
+        if all(ball_counts.get(color, 0) >= count for color, count in expected_balls.items()):
+            success_count += 1
+    
+    # Return the estimated probability (successes / total experiments)
+    return success_count / num_experiments
+
+# Example Usage:
+hat = Hat(blue=5, red=4, green=2)  # Create a hat with 5 blue balls, 4 red balls, and 2 green balls
+
+# Run an experiment to estimate the probability of drawing at least 1 red ball and 2 green balls
+probability = experiment(hat=hat,
+                         expected_balls={'red': 1, 'green': 2},
+                         num_balls_drawn=4,
+                         num_experiments=2000)
+
+print(f"The estimated probability is: {probability}")
